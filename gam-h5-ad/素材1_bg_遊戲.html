@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="ad.size" content="width=1,height=1">
+    <title>1x1 Expand Ad</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script type="text/javascript">
+var clickTag = "%%CLICK_URL_UNESC%%https://www.momoshop.com.tw/category/DgrpCategory.jsp?d_code=2138700017&p_orderType=4&showType=chessboardType&osm=t04&utm_source=BD_009618&utm_medium=google-cpc&scm_activity=202603200513zabcr5hl";
+    </script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            background-color: #000;
+        }
+        #bg-layer {
+            width: 100%;
+            display: block;
+        }
+        #bg-layer img {
+            width: 100%;
+            display: block;
+        }
+        #ad-container {
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            z-index: 999999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        #ad-container.ready {
+            opacity: 1;
+        }
+        #intro-video {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: auto;
+            transform: translateY(-50%);
+            z-index: 10;
+            transition: opacity 0.8s ease-out;
+            background-color: #000;
+        }
+        .hidden-video {
+            opacity: 0 !important;
+        }
+        #bottom-swiper-wrap {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            aspect-ratio: 2 / 1;
+            height: auto;
+            z-index: 5;
+            background: transparent;
+            opacity: 0;
+            transition: opacity 0.8s ease-in;
+            pointer-events: none;
+            display: none;
+        }
+        #bottom-swiper-wrap.show {
+            display: block;
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #close-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 26px;
+            height: 26px;
+            background-color: rgba(155, 155, 155, 0.6);
+            color: #fff;
+            font-size: 18px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            line-height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 20;
+            pointer-events: auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        .swiper {
+            width: 100%;
+            height: 100%;
+        }
+        .swiper-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: transparent;
+        }
+        .swiper-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .swiper-pagination-bullet {
+            background: #fff;
+            opacity: 0.6;
+        }
+        .swiper-pagination-bullet-active {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-layer">
+        <img src="IMG_3130.jpg" alt="Background">
+    </div>
+    <div id="ad-container">
+        <div onpointerup="window.open(clickTag, '_top')">
+	<video id="intro-video" muted playsinline>
+            <source src="https://static.91app.com/marketing-cloud/ads/demo1.mp4" type="video/mp4">
+        </video>
+	</div>
+        <div id="bottom-swiper-wrap">
+            <div id="close-btn" onclick="closeAd(event)">&times;</div>
+            <div class="swiper mySwiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <img src="https://rich-media-tool-platform.bclk.tw/dv360-ads/1773725956277-12785486f6fb2f21-Untitled_design__22_.png"
+                            alt="AD 1" ontouchend="window.open(clickTag, '_top')">
+                    </div>
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        var modifiedAncestors = [];
+        var ancestorObserver = null;
+
+        function tryExpand() {
+            if (window.$sf && window.$sf.ext) {
+                console.log('[Ad] SafeFrame 環境，使用 $sf.ext.expand');
+                try {
+                    var geom = window.$sf.ext.geom();
+                    var w = geom ? geom.win.w : screen.width;
+                    var h = geom ? geom.win.h : screen.height;
+                    window.$sf.ext.register(1, 1, function (id, msg) {
+                        console.log('[Ad] SafeFrame status:', msg);
+                        if (msg === 'expanded') { showAd(); }
+                    });
+                    window.$sf.ext.expand({ push: true, t: 0, l: 0, r: w, b: h });
+                } catch (e) {
+                    console.log('[Ad] SafeFrame expand failed:', e);
+                    showAd();
+                }
+                return;
+            }
+            if (window.frameElement) {
+                console.log('[Ad] Friendly iframe 環境');
+                try {
+                    fixAncestors();
+                    setIframeMode('fullscreen');
+                    startAncestorObserver();
+                    console.log('[Ad] 展開完成');
+                    showAd();
+                } catch (e) {
+                    console.log('[Ad] 展開失敗:', e);
+                    showAd();
+                }
+                return;
+            }
+            console.log('[Ad] 本機預覽環境');
+            showAd();
+        }
+
+        function fixAncestors() {
+            if (!window.frameElement) return;
+            var el = window.frameElement.parentElement;
+            while (el && el.tagName !== 'BODY' && el !== window.parent.document.documentElement) {
+                var computed = window.parent.getComputedStyle(el);
+                var alreadyTracked = false;
+                for (var i = 0; i < modifiedAncestors.length; i++) {
+                    if (modifiedAncestors[i].el === el) { alreadyTracked = true; break; }
+                }
+                if (!alreadyTracked) {
+                    modifiedAncestors.push({ el: el, originalStyle: el.getAttribute('style') || '' });
+                }
+                if (computed.display === 'none') { el.style.setProperty('display', 'block', 'important'); }
+                if (parseFloat(computed.opacity) === 0) { el.style.setProperty('opacity', '1', 'important'); }
+                if (computed.visibility === 'hidden') { el.style.setProperty('visibility', 'visible', 'important'); }
+                if (computed.pointerEvents === 'none') { el.style.setProperty('pointer-events', 'auto', 'important'); }
+                el.style.setProperty('transform', 'none', 'important');
+                var zIndex = parseInt(computed.zIndex);
+                if (!isNaN(zIndex) && zIndex < 0) { el.style.setProperty('z-index', '1', 'important'); }
+                console.log('[Ad] 修復祖先:', el.tagName, el.id || el.className);
+                el = el.parentElement;
+            }
+        }
+
+        function setIframeMode(mode) {
+            if (!window.frameElement) return;
+            var frame = window.frameElement;
+            frame.style.border = '0';
+            if (mode === 'fullscreen') {
+                frame.style.width = '100vw'; frame.style.height = '100vh';
+                frame.style.position = 'fixed'; frame.style.top = '0'; frame.style.left = '0';
+                frame.style.bottom = 'auto'; frame.style.zIndex = '999999';
+            } else if (mode === 'anchor') {
+                frame.style.width = '100vw'; frame.style.height = '50vw';
+                frame.style.position = 'fixed'; frame.style.top = 'auto'; frame.style.left = '0';
+                frame.style.bottom = '0'; frame.style.zIndex = '999999';
+            }
+            console.log('[Ad] iframe 模式:', mode);
+        }
+
+        function startAncestorObserver() {
+            if (!window.frameElement) return;
+            var targets = [];
+            var el = window.frameElement.parentElement;
+            while (el && el.tagName !== 'BODY' && el !== window.parent.document.documentElement) {
+                targets.push(el); el = el.parentElement;
+            }
+            ancestorObserver = new window.parent.MutationObserver(function (mutations) {
+                for (var i = 0; i < mutations.length; i++) {
+                    var target = mutations[i].target;
+                    var current = target.style.transform;
+                    if (current && current !== 'none') {
+                        target.style.setProperty('transform', 'none', 'important');
+                        console.log('[Ad] Observer 攔截 transform:', target.tagName, target.className);
+                    }
+                }
+            });
+            for (var i = 0; i < targets.length; i++) {
+                ancestorObserver.observe(targets[i], { attributes: true, attributeFilter: ['style'] });
+            }
+            console.log('[Ad] MutationObserver 啟動，監聽', targets.length, '個祖先');
+        }
+
+        function stopAncestorObserver() {
+            if (ancestorObserver) { ancestorObserver.disconnect(); ancestorObserver = null; }
+        }
+
+        function showAd() {
+            document.getElementById('ad-container').classList.add('ready');
+            startAdSequence();
+        }
+
+        function startAdSequence() {
+            var videoElement = document.getElementById('intro-video');
+            var swiperWrap = document.getElementById('bottom-swiper-wrap');
+            videoElement.play().catch(function (e) { console.log("Autoplay issue:", e); });
+            setTimeout(function () {
+                videoElement.classList.add('hidden-video');
+                setTimeout(function () { videoElement.pause(); videoElement.style.display = 'none'; }, 800);
+                swiperWrap.classList.add('show');
+                initSwiper();
+                setIframeMode('anchor');
+            }, 5000);
+        }
+
+        function initSwiper() {
+            new Swiper(".mySwiper", {
+                slidesPerView: 1, spaceBetween: 0, loop: true,
+                pagination: { el: ".swiper-pagination", clickable: true }
+            });
+        }
+
+        function closeAd(event) {
+            event.stopPropagation();
+            document.getElementById('ad-container').style.display = 'none';
+            if (window.$sf && window.$sf.ext) { try { window.$sf.ext.collapse(); } catch (e) { } }
+            stopAncestorObserver();
+            if (window.frameElement) {
+                try {
+                    var frame = window.frameElement;
+                    frame.style.width = '1px'; frame.style.height = '1px';
+                    frame.style.position = ''; frame.style.top = ''; frame.style.left = '';
+                    frame.style.bottom = ''; frame.style.zIndex = '';
+                    frame.width = 1; frame.height = 1;
+                    for (var i = 0; i < modifiedAncestors.length; i++) {
+                        modifiedAncestors[i].el.setAttribute('style', modifiedAncestors[i].originalStyle);
+                    }
+                    modifiedAncestors = [];
+                } catch (e) { }
+            }
+        }
+
+        window.onload = function () { tryExpand(); };
+    </script>
+</body>
+</html>

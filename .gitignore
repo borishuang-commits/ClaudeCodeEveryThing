@@ -1,0 +1,5 @@
+node_modules/
+*.pptx
+*.zip
+agent-workspace/
+.DS_Store
